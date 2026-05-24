@@ -133,6 +133,8 @@ public class PlayerController : MonoBehaviour
         _currentAmmo        = maxAmmo;
         _targetCrouchHeight = standingHeight;
         _cc.height          = standingHeight;
+        _cc.center          = new Vector3(0f, standingHeight / 2f, 0f);
+        _cc.radius          = 0.4f;
 
         if (flashlight != null)
         {
@@ -191,6 +193,7 @@ public class PlayerController : MonoBehaviour
 
         _cc.height = Mathf.Lerp(_cc.height, _targetCrouchHeight,
                                  Time.deltaTime * crouchTransitionSpeed);
+        _cc.center = new Vector3(0f, _cc.height / 2f, 0f);
 
         Vector3 camLocal = playerCamera.transform.localPosition;
         float   targetY  = _isCrouching ? crouchHeight * 0.8f : standingHeight * 0.9f;
