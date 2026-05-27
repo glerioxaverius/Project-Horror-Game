@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Image crosshairInteract;
     [SerializeField] private Image damageVignette;
     [SerializeField] private Image staminaBarFill;
+    [SerializeField] private Text healthText;
 
     [Header("Movement Settings")]
     [SerializeField] private float walkSpeed            = 3.0f;
@@ -289,7 +290,7 @@ public class PlayerController : MonoBehaviour
             {
                 SetCrosshair(true);
                 if (Input.GetKeyDown(KeyCode.E))
-                    interactable.Interact(this);
+                    interactable.Interact(this.gameObject);
                 return;
             }
         }
@@ -386,6 +387,14 @@ public class PlayerController : MonoBehaviour
         if (playerHurtSound != null) _audio.PlayOneShot(playerHurtSound);
         if (_currentHealth <= 0f) OnPlayerDeath();
     }
+    
+        public void Heal(float amount)
+    {
+        _currentHealth += amount;
+        _currentHealth = Mathf.Min(_currentHealth, maxHealth); 
+        Debug.Log("Darah bertambah!");
+    }
+
 
     private void UpdateDamageVignette()
     {
@@ -400,7 +409,6 @@ public class PlayerController : MonoBehaviour
     private void OnPlayerDeath()
     {
         Debug.Log("[PlayerController] Player meninggal. Game Over.");
-        // GameManager.Instance.TriggerGameOver();
         enabled = false;
     }
 
@@ -414,6 +422,11 @@ public class PlayerController : MonoBehaviour
     {
         if (staminaBarFill != null)
             staminaBarFill.fillAmount = _currentStamina / maxStamina;
+
+        if (healthText != null)
+        {
+            healthText.text = "HP: " + Mathf.RoundToInt(_currentHealth).ToString();
+        }
     }
 
     public void EquipAxe()
@@ -448,4 +461,5 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawRay(playerCamera.transform.position,
                        playerCamera.transform.forward * gunRange);
     }
+
 }
