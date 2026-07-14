@@ -51,6 +51,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float maxHealth            = 100f;
     [SerializeField] private float vignetteDecayRate    = 0.8f;
 
+    [SerializeField] private InventoryUI inventoryUI;
+
 
     [Header("Melee Settings")]
     [SerializeField] private float axeRange             = 1.8f;
@@ -150,6 +152,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+
+        if (inventoryUI == null || !inventoryUI.IsOpen)
+        {
+            HandleLook();
+        }
         HandleGroundCheck();
         HandleLook();
         HandleCrouch();
@@ -161,6 +168,7 @@ public class PlayerController : MonoBehaviour
         HandleNoiseDecay();
         UpdateDamageVignette();
         UpdateUI();
+        HandleInventoryInput();
     }
 
     private void HandleGroundCheck()
@@ -278,10 +286,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void HandleInteraction()
+private ItemPickup _currentTargetItem;
+private void HandleInteraction()
     {
-        Ray ray = new Ray(playerCamera.transform.position,
-                          playerCamera.transform.forward);
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
 
         if (Physics.Raycast(ray, out RaycastHit hit, interactionRange, interactableLayer))
         {
@@ -289,13 +297,66 @@ public class PlayerController : MonoBehaviour
             if (interactable != null)
             {
                 SetCrosshair(true);
+
+                // 🟥 JIKA OBJEK ADALAH ITEM PICKUP, NYALAKAN WORLD SPACE UI-NYA
+                ItemPickup pickup = hit.collider.GetComponent<ItemPickup>();
+                if (pickup != null)
+                {
+                    // Jika mengganti tatapan ke item baru, matikan UI item lama dulu
+                    if (_currentTargetItem != null && _currentTargetItem != pickup)
+                    {
+                        _currentTargetItem.ShowUI(false);
+                    }
+
+                    _currentTargetItem = pickup;
+                    _currentTargetItem.ShowUI(true); // Nyalakan UI melayang di atas barang
+                }
+
                 if (Input.GetKeyDown(KeyCode.E))
+                {
+                    // Sebelum dihancurkan, bersihkan catatan target agar tidak error
+                    if (_currentTargetItem != null) _currentTargetItem = null;
+                    
                     interactable.Interact(this.gameObject);
+                    return; 
+                }
+                
                 return;
             }
         }
 
+        // 🟥 JIKA LASER TIDAK MENGENAI APA-APA, MATIKAN UI MELAYANG YANG SEDANG AKTIF
+        if (_currentTargetItem != null)
+        {
+            _currentTargetItem.ShowUI(false);
+            _currentTargetItem = null;
+        }
+
         SetCrosshair(false);
+    }
+
+private void HandleInventoryInput()
+    {
+        // 1. Tes apakah tombol TAB terbaca oleh Windows/Unity
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            Debug.LogWarning("[TEST 1] Tombol TAB terdeteksi ditekan di keyboard!");
+
+            // 2. Tes apakah variabel inventoryUI berhasil mengenali objek mainInventory
+            if (inventoryUI != null)
+            {
+                Debug.LogWarning($"[TEST 2] Referensi InventoryUI aman. Status sebelum pencet: IsOpen = {inventoryUI.IsOpen}");
+                
+                // Panggil fungsi buka/tutup
+                inventoryUI.ToggleInventory();
+                
+                Debug.LogWarning($"[TEST 3] Fungsi Toggle sukses dipanggil. Status sesudah pencet: IsOpen = {inventoryUI.IsOpen}");
+            }
+            else
+            {
+                Debug.LogError("[ERROR] Tombol TAB ditekan, tapi script PlayerController kehilangan arah karena variabel 'inventoryUI' KOSONG (Null)!");
+            }
+        }
     }
 
     private void HandleCombat()

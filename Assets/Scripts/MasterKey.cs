@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class Medkit : MonoBehaviour, IInteractable
+public class MasterKey : MonoBehaviour, IInteractable
 {
     [SerializeField] private float healAmount = 25f;
-    public string InteractionPrompt => "Ambil Medkit";
+    public string InteractionPrompt => "Ambil Master Key";
 
     public void Interact(GameObject interactor)
     {

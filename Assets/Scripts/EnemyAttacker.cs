@@ -1,51 +1,41 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.AI; 
 
 public class EnemyAttacker : MonoBehaviour
 {
     [Header("Attack Settings")]
     [SerializeField] private float damageAmount = 20f;
-    [SerializeField] private float attackInterval = 2.0f; 
-    [SerializeField] private float damageDelay = 0.5f;    
-
-    [Header("References")]
-    [SerializeField] private Animator animator; 
-
-    private float _nextAttackTime = 0f;
-    private bool _isAttacking = false;
-
     
-    private void OnTriggerStay(Collider other)
+    [SerializeField] private float attackInterval = 5f; 
+    [SerializeField] private float damageDelay = 1.49f;
+    private NavMeshAgent _agent;
+    private Animator _animator;
+
+    private void Start()
     {
-            if (other.TryGetComponent(out PlayerController player))
-        {
-                if (Time.time >= _nextAttackTime && !_isAttacking)
-            {
-                StartCoroutine(AttackRoutine(player));
-            }
-        }
+        _agent = GetComponent<NavMeshAgent>();
+        _animator = GetComponent<Animator>();
     }
 
-    private IEnumerator AttackRoutine(PlayerController player)
+    private IEnumerator AttackRoutine()
     {
-        _isAttacking = true;
-        
-        _nextAttackTime = Time.time + attackInterval;
-
-        if (animator != null)
+        if (_agent != null)
         {
-            animator.SetTrigger("Attack");
-            Debug.Log("[Enemy] Memulai animasi serangan!");
+            _agent.isStopped = true;       
+            _agent.velocity = Vector3.zero; 
         }
 
-        yield return new WaitForSeconds(damageDelay);
-
-        if (player != null && player.CurrentHealth > 0)
+        if (_animator != null)
         {
-            player.TakeDamage(damageAmount);
-            Debug.Log($"[Enemy] Player terkena hit! Damage: {damageAmount}");
+            _animator.SetTrigger("Attack"); 
         }
 
-        _isAttacking = false;
+        yield return new WaitForSeconds(attackInterval);
+
+        if (_agent != null)
+        {
+            _agent.isStopped = false; 
+        }
     }
 }
