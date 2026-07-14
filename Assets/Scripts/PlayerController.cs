@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Image crosshairInteract;
     [SerializeField] private Image damageVignette;
     [SerializeField] private Image staminaBarFill;
+    [SerializeField] private Text healthText;
 
     [Header("Movement Settings")]
     [SerializeField] private float walkSpeed            = 3.0f;
@@ -49,6 +50,8 @@ public class PlayerController : MonoBehaviour
     [Header("Health Settings")]
     [SerializeField] private float maxHealth            = 100f;
     [SerializeField] private float vignetteDecayRate    = 0.8f;
+
+    [SerializeField] private InventoryUI inventoryUI;
 
 
     [Header("Melee Settings")]
@@ -149,6 +152,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+
+        if (inventoryUI == null || !inventoryUI.IsOpen)
+        {
+            HandleLook();
+        }
         HandleGroundCheck();
         HandleLook();
         HandleCrouch();
@@ -160,6 +168,7 @@ public class PlayerController : MonoBehaviour
         HandleNoiseDecay();
         UpdateDamageVignette();
         UpdateUI();
+        HandleInventoryInput();
     }
 
     private void HandleGroundCheck()
@@ -277,10 +286,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void HandleInteraction()
+private ItemPickup _currentTargetItem;
+private void HandleInteraction()
     {
-        Ray ray = new Ray(playerCamera.transform.position,
-                          playerCamera.transform.forward);
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
 
         if (Physics.Raycast(ray, out RaycastHit hit, interactionRange, interactableLayer))
         {
@@ -288,13 +297,59 @@ public class PlayerController : MonoBehaviour
             if (interactable != null)
             {
                 SetCrosshair(true);
+
+                ItemPickup pickup = hit.collider.GetComponent<ItemPickup>();
+                if (pickup != null)
+                {
+                    if (_currentTargetItem != null && _currentTargetItem != pickup)
+                    {
+                        _currentTargetItem.ShowUI(false);
+                    }
+
+                    _currentTargetItem = pickup;
+                    _currentTargetItem.ShowUI(true); 
+                }
+
                 if (Input.GetKeyDown(KeyCode.E))
-                    interactable.Interact(this);
+                {
+                    if (_currentTargetItem != null) _currentTargetItem = null;
+                    
+                    interactable.Interact(this.gameObject);
+                    return; 
+                }
+                
                 return;
             }
         }
 
+        if (_currentTargetItem != null)
+        {
+            _currentTargetItem.ShowUI(false);
+            _currentTargetItem = null;
+        }
+
         SetCrosshair(false);
+    }
+
+private void HandleInventoryInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            Debug.LogWarning("[TEST 1] Tombol TAB terdeteksi ditekan di keyboard!");
+
+            if (inventoryUI != null)
+            {
+                Debug.LogWarning($"[TEST 2] Referensi InventoryUI aman. Status sebelum pencet: IsOpen = {inventoryUI.IsOpen}");
+                
+                inventoryUI.ToggleInventory();
+                
+                Debug.LogWarning($"[TEST 3] Fungsi Toggle sukses dipanggil. Status sesudah pencet: IsOpen = {inventoryUI.IsOpen}");
+            }
+            else
+            {
+                Debug.LogError("[ERROR] Tombol TAB ditekan, tapi script PlayerController kehilangan arah karena variabel 'inventoryUI' KOSONG (Null)!");
+            }
+        }
     }
 
     private void HandleCombat()
@@ -386,6 +441,14 @@ public class PlayerController : MonoBehaviour
         if (playerHurtSound != null) _audio.PlayOneShot(playerHurtSound);
         if (_currentHealth <= 0f) OnPlayerDeath();
     }
+    
+        public void Heal(float amount)
+    {
+        _currentHealth += amount;
+        _currentHealth = Mathf.Min(_currentHealth, maxHealth); 
+        Debug.Log("Darah bertambah!");
+    }
+
 
     private void UpdateDamageVignette()
     {
@@ -400,7 +463,6 @@ public class PlayerController : MonoBehaviour
     private void OnPlayerDeath()
     {
         Debug.Log("[PlayerController] Player meninggal. Game Over.");
-        // GameManager.Instance.TriggerGameOver();
         enabled = false;
     }
 
@@ -414,6 +476,11 @@ public class PlayerController : MonoBehaviour
     {
         if (staminaBarFill != null)
             staminaBarFill.fillAmount = _currentStamina / maxStamina;
+
+        if (healthText != null)
+        {
+            healthText.text = "HP: " + Mathf.RoundToInt(_currentHealth).ToString();
+        }
     }
 
     public void EquipAxe()
@@ -448,4 +515,5 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawRay(playerCamera.transform.position,
                        playerCamera.transform.forward * gunRange);
     }
+
 }

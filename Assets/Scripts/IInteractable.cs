@@ -1,5 +1,7 @@
+using UnityEngine;
+            
 public interface IInteractable
 {
-    /// <param name="player">.</param>
-    void Interact(PlayerController player);
+    /// <param name="interactor"></param>
+    void Interact(GameObject interactor);
 }
