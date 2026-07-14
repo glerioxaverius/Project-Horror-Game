@@ -2,6 +2,6 @@ using UnityEngine;
             
 public interface IInteractable
 {
-    /// <param name="interactor">The game object that is interacting with the object.</param>
+    /// <param name="interactor"></param>
     void Interact(GameObject interactor);
 }

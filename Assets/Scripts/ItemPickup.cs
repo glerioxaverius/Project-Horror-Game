@@ -4,14 +4,12 @@ public class ItemPickup : MonoBehaviour, IInteractable
 {
     [SerializeField] private ItemData itemData; 
     
-    // 🟥 Tarik objek InteractCanvas (World Space) ke kolom ini di Inspector
     [SerializeField] private GameObject interactUI; 
 
     public string InteractionPrompt => $"Ambil {itemData.itemName}";
 
     private void Start()
     {
-        // Pastikan UI mati saat pertama kali game berjalan
         if (interactUI != null) interactUI.SetActive(false);
     }
 
@@ -24,7 +22,6 @@ public class ItemPickup : MonoBehaviour, IInteractable
         }
     }
 
-    // 🟥 FUNGSI BARU: Dipanggil oleh PlayerController saat laser menatap objek ini
     public void ShowUI(bool state)
     {
         if (interactUI != null)

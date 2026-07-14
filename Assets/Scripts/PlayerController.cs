@@ -298,23 +298,20 @@ private void HandleInteraction()
             {
                 SetCrosshair(true);
 
-                // 🟥 JIKA OBJEK ADALAH ITEM PICKUP, NYALAKAN WORLD SPACE UI-NYA
                 ItemPickup pickup = hit.collider.GetComponent<ItemPickup>();
                 if (pickup != null)
                 {
-                    // Jika mengganti tatapan ke item baru, matikan UI item lama dulu
                     if (_currentTargetItem != null && _currentTargetItem != pickup)
                     {
                         _currentTargetItem.ShowUI(false);
                     }
 
                     _currentTargetItem = pickup;
-                    _currentTargetItem.ShowUI(true); // Nyalakan UI melayang di atas barang
+                    _currentTargetItem.ShowUI(true); 
                 }
 
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    // Sebelum dihancurkan, bersihkan catatan target agar tidak error
                     if (_currentTargetItem != null) _currentTargetItem = null;
                     
                     interactable.Interact(this.gameObject);
@@ -325,7 +322,6 @@ private void HandleInteraction()
             }
         }
 
-        // 🟥 JIKA LASER TIDAK MENGENAI APA-APA, MATIKAN UI MELAYANG YANG SEDANG AKTIF
         if (_currentTargetItem != null)
         {
             _currentTargetItem.ShowUI(false);
@@ -337,17 +333,14 @@ private void HandleInteraction()
 
 private void HandleInventoryInput()
     {
-        // 1. Tes apakah tombol TAB terbaca oleh Windows/Unity
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             Debug.LogWarning("[TEST 1] Tombol TAB terdeteksi ditekan di keyboard!");
 
-            // 2. Tes apakah variabel inventoryUI berhasil mengenali objek mainInventory
             if (inventoryUI != null)
             {
                 Debug.LogWarning($"[TEST 2] Referensi InventoryUI aman. Status sebelum pencet: IsOpen = {inventoryUI.IsOpen}");
                 
-                // Panggil fungsi buka/tutup
                 inventoryUI.ToggleInventory();
                 
                 Debug.LogWarning($"[TEST 3] Fungsi Toggle sukses dipanggil. Status sesudah pencet: IsOpen = {inventoryUI.IsOpen}");

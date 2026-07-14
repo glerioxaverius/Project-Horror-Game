@@ -1,9 +1,9 @@
 using UnityEngine;
-using UnityEngine.UI; // Wajib untuk komponen Image
+using UnityEngine.UI;
 
 public class InventorySlot : MonoBehaviour
 {
-    [SerializeField] private Image iconImage; // Tarik objek anak 'ItemIcon' ke sini
+    [SerializeField] private Image iconImage;
 
     private void Awake()
     {
